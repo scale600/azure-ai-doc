@@ -46,3 +46,7 @@ build/
 
 # Excluded docs (kept local, not tracked in git)
 docs/cost-management.md
+
+# Playwright / screenshots
+.playwright-mcp/
+*.png

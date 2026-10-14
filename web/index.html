@@ -13,25 +13,56 @@
   </header>
 
   <main class="container">
-    <section class="card" id="upload-card">
+    <section class="stats" id="stats-bar" hidden>
+      <div class="stat">
+        <span class="stat-value" id="stat-total">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-completed">0</span>
+        <span class="stat-label">Completed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-failed">0</span>
+        <span class="stat-label">Failed</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="stat-rate">—</span>
+        <span class="stat-label">Success rate</span>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>Upload document</h2>
-      <form id="upload-form">
-        <div class="row">
-          <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" required />
-          <select id="type-select">
-            <option value="">Auto-detect</option>
-            <option value="KYC_ID">KYC ID</option>
-            <option value="INVOICE">Invoice</option>
-          </select>
-          <button type="submit">Upload</button>
-        </div>
-        <p class="hint">PDF/PNG/JPEG, max 4MB, 1–2 pages. Status updates automatically.</p>
-      </form>
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a file">
+        <div class="dropzone-icon">📄</div>
+        <p class="dropzone-text">Drag &amp; drop a file here, or <span class="browse">browse</span></p>
+        <p class="dropzone-hint">PDF / PNG / JPEG · max 4MB · 1–2 pages</p>
+        <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" hidden />
+      </div>
+      <div class="upload-controls">
+        <span class="selected-file" id="selected-file"></span>
+        <select id="type-select" aria-label="Document type">
+          <option value="">Auto-detect</option>
+          <option value="KYC_ID">KYC ID</option>
+          <option value="INVOICE">Invoice</option>
+        </select>
+        <button type="button" id="upload-btn">Upload</button>
+      </div>
       <div id="upload-status" class="status" hidden></div>
     </section>
 
     <section class="card">
-      <h2>Documents</h2>
+      <div class="card-header">
+        <h2>Documents</h2>
+        <button id="refresh-btn" class="icon-btn" title="Refresh" aria-label="Refresh">↻</button>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All <span class="count" id="count-all">0</span></button>
+        <button class="filter-tab" data-filter="PROCESSING">Processing <span class="count" id="count-processing">0</span></button>
+        <button class="filter-tab" data-filter="COMPLETED">Completed <span class="count" id="count-completed">0</span></button>
+        <button class="filter-tab" data-filter="FAILED">Failed <span class="count" id="count-failed">0</span></button>
+      </div>
       <table class="doc-table">
         <thead>
           <tr>
@@ -43,13 +74,16 @@
           </tr>
         </thead>
         <tbody id="doc-list">
-          <tr><td colspan="5" class="empty">Loading…</td></tr>
+          <tr><td colspan="5" class="empty"><span class="spinner"></span> Loading…</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="card" id="detail-card" hidden>
-      <h2>Document detail</h2>
+      <div class="card-header">
+        <h2>Document detail</h2>
+        <button class="link" id="close-detail">Close</button>
+      </div>
       <div id="detail-body"></div>
     </section>
   </main>
