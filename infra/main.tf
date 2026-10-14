@@ -9,7 +9,7 @@ locals {
   function_plan_name         = "plan-idp-${var.unique_suffix}"
   document_intelligence_name = "di-idp-${var.unique_suffix}"
   openai_name                = "oai-idp-${var.unique_suffix}"
-  sql_server_name            = "sql-idp-${var.unique_suffix}"
+  sql_server_name          = "sql-idp-rl02" # rl01 stuck in SQL provisioning; renamed to avoid async conflict
   sql_database_name          = "idpdb"
   keyvault_name              = "kv-idp-${var.unique_suffix}"
   app_insights_name          = "appi-idp-${var.unique_suffix}"

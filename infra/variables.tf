@@ -50,13 +50,13 @@ variable "openai_sku" {
 variable "openai_model_name" {
   description = "Azure OpenAI model to deploy."
   type        = string
-  default     = "gpt-4o-mini"
+  default     = "gpt-4.1-mini"
 }
 
 variable "openai_model_version" {
   description = "Azure OpenAI model version."
   type        = string
-  default     = "2024-07-18"
+  default     = "2025-04-14"
 }
 
 variable "openai_deployment_sku" {
