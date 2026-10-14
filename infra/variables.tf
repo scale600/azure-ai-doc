@@ -11,7 +11,7 @@ variable "subscription_id" {
 variable "location" {
   description = "Azure region for all resources (US)."
   type        = string
-  default     = "eastus"
+  default     = "centralus"
 }
 
 variable "environment" {

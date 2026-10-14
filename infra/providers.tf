@@ -20,7 +20,11 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
   # The subscription is selected via `az login` / `az account set`.
   # Override per environment via: TF_VAR_subscription_id or -var-file.
   subscription_id = var.subscription_id
