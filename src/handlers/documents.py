@@ -86,14 +86,19 @@ def register(app: func.FunctionApp) -> None:
         return _json({"status": "ok"})
 
     @app.route(
-        route="documents", methods=["POST", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS
+        route="documents",
+        methods=["GET", "POST", "OPTIONS"],
+        auth_level=func.AuthLevel.ANONYMOUS,
     )
-    def upload(req: func.HttpRequest) -> func.HttpResponse:
+    def documents(req: func.HttpRequest) -> func.HttpResponse:
         pre = _preflight(req)
         if pre is not None:
             return pre
         if not is_authorized(req):
             return _error("unauthorized", 401)
+
+        if req.method == "GET":
+            return _json({"documents": _sql().list_documents()})
 
         file = req.files.get("file")
         if file is None:
@@ -133,17 +138,6 @@ def register(app: func.FunctionApp) -> None:
             return _error("blob upload failed", 500)
 
         return _json({"documentId": document_id, "status": "ACCEPTED"}, 202)
-
-    @app.route(
-        route="documents", methods=["GET", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS
-    )
-    def list_documents(req: func.HttpRequest) -> func.HttpResponse:
-        pre = _preflight(req)
-        if pre is not None:
-            return pre
-        if not is_authorized(req):
-            return _error("unauthorized", 401)
-        return _json({"documents": _sql().list_documents()})
 
     @app.route(
         route="documents/{document_id}",

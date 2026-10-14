@@ -38,7 +38,7 @@ class DocumentIntelligenceClient:
         poller = self._client.begin_analyze_document(model_id, content)
         result = poller.result()
 
-        ocr_text = " ".join(page.content for page in result.pages) if result.pages else ""
+        ocr_text = result.content or ""
 
         if not result.documents:
             logger.warning("No documents detected for model %s", model_id)
