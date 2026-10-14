@@ -1,0 +1,48 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+local.settings.json
+*.pem
+*.key
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*.auto.tfvars
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.eslintcache
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local tooling
+.codegraph
+.omo
+
+# Excluded docs (kept local, not tracked in git)
+docs/cost-management.md

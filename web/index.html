@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Document Processing — Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📄 AI Doc Processing</div>
+    <span class="subtitle">KYC &amp; loan document pipeline</span>
+  </header>
+
+  <main class="container">
+    <section class="card" id="upload-card">
+      <h2>Upload document</h2>
+      <form id="upload-form">
+        <div class="row">
+          <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" required />
+          <select id="type-select">
+            <option value="">Auto-detect</option>
+            <option value="KYC_ID">KYC ID</option>
+            <option value="INVOICE">Invoice</option>
+          </select>
+          <button type="submit">Upload</button>
+        </div>
+        <p class="hint">PDF/PNG/JPEG, max 4MB, 1–2 pages. Status updates automatically.</p>
+      </form>
+      <div id="upload-status" class="status" hidden></div>
+    </section>
+
+    <section class="card">
+      <h2>Documents</h2>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Uploaded</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="doc-list">
+          <tr><td colspan="5" class="empty">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card" id="detail-card" hidden>
+      <h2>Document detail</h2>
+      <div id="detail-body"></div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

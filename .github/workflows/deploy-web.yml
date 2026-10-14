@@ -1,0 +1,36 @@
+name: Deploy Static Web App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject runtime config (config.js from secrets)
+        run: |
+          cat > web/config.js <<EOF
+          window.APP_CONFIG = {
+            functionAppUrl: "${{ vars.FUNCTION_APP_URL }}",
+            apiKey: "${{ secrets.API_KEY }}"
+          };
+          EOF
+
+      - name: Deploy to Static Web App
+        uses: azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "upload"
+          app_location: "web"
+          skip_app_build: true

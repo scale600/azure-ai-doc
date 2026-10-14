@@ -1,0 +1,17 @@
+# Copy to `terraform.tfvars` (gitignored) and edit. Values here are placeholders.
+
+location         = "eastus"
+environment      = "proto"
+unique_suffix    = "CHANGE_ME" # 4-6 lowercase alphanumeric, globally unique
+
+# Optional overrides (defaults in variables.tf are fine for a prototype):
+# subscription_id        = "2b3be09f-be52-4834-848c-51abe85d3c72"
+# document_intelligence_sku = "F0"
+# openai_sku             = "S0"
+# openai_model_name      = "gpt-4o-mini"
+# sql_database_sku       = "Free"
+# custom_domain          = "azure-ai-doc.techcloudup.com"
+
+# Cloudflare (manual DNS = leave both empty):
+# cloudflare_api_token   = ""
+# cloudflare_zone_id     = ""
