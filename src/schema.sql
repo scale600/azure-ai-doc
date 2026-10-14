@@ -13,7 +13,8 @@ BEGIN
         SizeBytes BIGINT NULL,
         UploadedBy NVARCHAR(100) NULL,
         UploadedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        ProcessedAt DATETIME2 NULL
+        ProcessedAt DATETIME2 NULL,
+        ErrorMessage NVARCHAR(MAX) NULL
     );
 END;
 
@@ -46,8 +47,20 @@ BEGIN
         PromptVersion NVARCHAR(20) NULL,
         TokensIn INT NULL,
         TokensOut INT NULL,
+        Confidence FLOAT NULL,
+        KeyFieldsJson NVARCHAR(MAX) NULL,
         CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         CONSTRAINT FK_AIInsights_Documents
             FOREIGN KEY (DocumentId) REFERENCES dbo.Documents(DocumentId)
     );
 END;
+
+-- Idempotent migrations for pre-existing databases (columns added later).
+IF COL_LENGTH('dbo.Documents', 'ErrorMessage') IS NULL
+    ALTER TABLE dbo.Documents ADD ErrorMessage NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('dbo.AIInsights', 'Confidence') IS NULL
+    ALTER TABLE dbo.AIInsights ADD Confidence FLOAT NULL;
+
+IF COL_LENGTH('dbo.AIInsights', 'KeyFieldsJson') IS NULL
+    ALTER TABLE dbo.AIInsights ADD KeyFieldsJson NVARCHAR(MAX) NULL;

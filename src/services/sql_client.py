@@ -77,12 +77,25 @@ class SqlClient:
                 document_id,
             )
 
+    def mark_failed(self, document_id: str, error_message: str) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE dbo.Documents
+                SET Status = ?, ErrorMessage = ?, ProcessedAt = SYSUTCDATETIME()
+                WHERE DocumentId = ?
+                """,
+                DocumentStatus.FAILED,
+                error_message,
+                document_id,
+            )
+
     def list_documents(self, limit: int = 100) -> list[dict]:
         with self._connect() as conn:
             rows = conn.execute(
                 """
                 SELECT TOP (?) DocumentId, FileName, DocumentType, Status,
-                       PageCount, SizeBytes, UploadedAt, ProcessedAt
+                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage
                 FROM dbo.Documents ORDER BY UploadedAt DESC
                 """,
                 limit,
@@ -94,7 +107,7 @@ class SqlClient:
             row = conn.execute(
                 """
                 SELECT DocumentId, FileName, DocumentType, Status,
-                       PageCount, SizeBytes, UploadedAt, ProcessedAt
+                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage
                 FROM dbo.Documents WHERE DocumentId = ?
                 """,
                 document_id,
@@ -106,7 +119,7 @@ class SqlClient:
             insight = conn.execute(
                 """
                 SELECT Summary, Classification, RiskFlags, MissingFields,
-                       RecommendedAction, ModelName, TokensIn, TokensOut
+                       RecommendedAction, ModelName, TokensIn, TokensOut, Confidence, KeyFieldsJson
                 FROM dbo.AIInsights WHERE DocumentId = ? ORDER BY CreatedAt DESC
                 """,
                 document_id,
@@ -120,6 +133,8 @@ class SqlClient:
                 doc["modelName"] = insight[5]
                 doc["tokensIn"] = insight[6]
                 doc["tokensOut"] = insight[7]
+                doc["confidence"] = insight[8]
+                doc["keyFields"] = json.loads(insight[9] or "{}")
         return doc
 
     # --- Extraction / Insight ---------------------------------------------
@@ -162,8 +177,8 @@ class SqlClient:
                 INSERT INTO dbo.AIInsights
                     (InsightId, DocumentId, Summary, Classification, RiskFlags,
                      MissingFields, RecommendedAction, ModelName, PromptVersion,
-                     TokensIn, TokensOut, CreatedAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
+                     TokensIn, TokensOut, Confidence, KeyFieldsJson, CreatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSUTCDATETIME())
                 """,
                 insight_id,
                 document_id,
@@ -176,6 +191,8 @@ class SqlClient:
                 prompt_version,
                 tokens_in,
                 tokens_out,
+                insight.confidence,
+                json.dumps(insight.keyFields, ensure_ascii=False),
             )
 
     @staticmethod
@@ -189,4 +206,5 @@ class SqlClient:
             "sizeBytes": row[5],
             "uploadedAt": row[6].isoformat() if row[6] else None,
             "processedAt": row[7].isoformat() if row[7] else None,
+            "errorMessage": row[8],
         }

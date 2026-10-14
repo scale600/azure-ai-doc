@@ -67,7 +67,7 @@ def process_document(
         sql.mark_completed(document_id, insight.classification or "UNKNOWN")
         logger.info("Completed document %s (%s)", document_id, model_id)
 
-    except Exception:  # noqa: BLE001 — mark failed and re-raise for retry/visibility
-        sql.update_status(document_id, DocumentStatus.FAILED)
+    except Exception as exc:  # noqa: BLE001 — mark failed and re-raise for retry/visibility
+        sql.mark_failed(document_id, str(exc))
         logger.exception("Failed document %s", document_id)
         raise
