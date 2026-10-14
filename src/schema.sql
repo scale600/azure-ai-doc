@@ -14,7 +14,8 @@ BEGIN
         UploadedBy NVARCHAR(100) NULL,
         UploadedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         ProcessedAt DATETIME2 NULL,
-        ErrorMessage NVARCHAR(MAX) NULL
+        ErrorMessage NVARCHAR(MAX) NULL,
+        ProcessingStep NVARCHAR(50) NULL
     );
 END;
 
@@ -64,3 +65,6 @@ IF COL_LENGTH('dbo.AIInsights', 'Confidence') IS NULL
 
 IF COL_LENGTH('dbo.AIInsights', 'KeyFieldsJson') IS NULL
     ALTER TABLE dbo.AIInsights ADD KeyFieldsJson NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('dbo.Documents', 'ProcessingStep') IS NULL
+    ALTER TABLE dbo.Documents ADD ProcessingStep NVARCHAR(50) NULL;

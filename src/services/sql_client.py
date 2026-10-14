@@ -64,6 +64,14 @@ class SqlClient:
                 document_id,
             )
 
+    def update_step(self, document_id: str, step: str) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE dbo.Documents SET ProcessingStep = ? WHERE DocumentId = ?",
+                step,
+                document_id,
+            )
+
     def mark_completed(self, document_id: str, document_type: str) -> None:
         with self._connect() as conn:
             conn.execute(
@@ -95,7 +103,7 @@ class SqlClient:
             rows = conn.execute(
                 """
                 SELECT TOP (?) DocumentId, FileName, DocumentType, Status,
-                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage
+                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage, ProcessingStep
                 FROM dbo.Documents ORDER BY UploadedAt DESC
                 """,
                 limit,
@@ -107,7 +115,7 @@ class SqlClient:
             row = conn.execute(
                 """
                 SELECT DocumentId, FileName, DocumentType, Status,
-                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage
+                       PageCount, SizeBytes, UploadedAt, ProcessedAt, ErrorMessage, ProcessingStep
                 FROM dbo.Documents WHERE DocumentId = ?
                 """,
                 document_id,
@@ -207,4 +215,5 @@ class SqlClient:
             "uploadedAt": row[6].isoformat() if row[6] else None,
             "processedAt": row[7].isoformat() if row[7] else None,
             "errorMessage": row[8],
+            "processingStep": row[9],
         }

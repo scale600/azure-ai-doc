@@ -3,41 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Document Processing — Dashboard</title>
+  <title>AI Document Processing</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">📄 AI Doc Processing</div>
-    <span class="subtitle">Document Intelligence + Azure OpenAI pipeline</span>
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-text">AI Document Processing</span>
+      </div>
+      <span class="subtitle">Document Intelligence · Azure OpenAI</span>
+    </div>
   </header>
 
   <main class="container">
     <section class="stats" id="stats-bar" hidden>
       <div class="stat">
-        <span class="stat-value" id="stat-total">0</span>
-        <span class="stat-label">Total</span>
+        <span class="stat-icon">📄</span>
+        <div class="stat-body">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Total documents</span>
+        </div>
       </div>
       <div class="stat">
-        <span class="stat-value" id="stat-completed">0</span>
-        <span class="stat-label">Completed</span>
+        <span class="stat-icon stat-ok">✓</span>
+        <div class="stat-body">
+          <span class="stat-value" id="stat-completed">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
       </div>
       <div class="stat">
-        <span class="stat-value" id="stat-failed">0</span>
-        <span class="stat-label">Failed</span>
+        <span class="stat-icon stat-err">✕</span>
+        <div class="stat-body">
+          <span class="stat-value" id="stat-failed">0</span>
+          <span class="stat-label">Failed</span>
+        </div>
       </div>
       <div class="stat">
-        <span class="stat-value" id="stat-rate">—</span>
-        <span class="stat-label">Success rate</span>
+        <span class="stat-icon stat-rate">◎</span>
+        <div class="stat-body">
+          <span class="stat-value" id="stat-rate">—</span>
+          <span class="stat-label">Success rate</span>
+        </div>
       </div>
     </section>
 
     <section class="card">
-      <h2>Upload document</h2>
+      <div class="card-heading">
+        <div>
+          <h2>Upload document</h2>
+          <p class="card-sub">Drop a KYC or invoice document to run the AI pipeline</p>
+        </div>
+        <span class="card-tag">PDF · PNG · JPEG</span>
+      </div>
       <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a file">
-        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-icon">⬆</div>
         <p class="dropzone-text">Drag &amp; drop a file here, or <span class="browse">browse</span></p>
-        <p class="dropzone-hint">PDF / PNG / JPEG · max 4MB · 1–2 pages</p>
+        <p class="dropzone-hint">Max 4MB · 1–2 pages</p>
         <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" hidden />
       </div>
       <div class="upload-controls">
@@ -47,13 +70,13 @@
           <option value="KYC_ID">KYC ID</option>
           <option value="INVOICE">Invoice</option>
         </select>
-        <button type="button" id="upload-btn">Upload</button>
+        <button type="button" id="upload-btn" disabled>Upload</button>
       </div>
       <div id="upload-status" class="status" hidden></div>
     </section>
 
     <section class="card">
-      <div class="card-header">
+      <div class="card-heading">
         <h2>Documents</h2>
         <button id="refresh-btn" class="icon-btn" title="Refresh" aria-label="Refresh">↻</button>
       </div>
@@ -80,7 +103,7 @@
     </section>
 
     <section class="card" id="detail-card" hidden>
-      <div class="card-header">
+      <div class="card-heading">
         <h2>Document detail</h2>
         <button class="link" id="close-detail">Close</button>
       </div>

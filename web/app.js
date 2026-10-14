@@ -55,6 +55,64 @@ function statusBadge(status) {
   return `<span class="badge ${cls}">${status}</span>`;
 }
 
+const PIPELINE = [
+  { key: "upload", label: "Upload", icon: "⬆" },
+  { key: "ocr", label: "OCR", icon: "🔍" },
+  { key: "ai", label: "AI", icon: "✦" },
+  { key: "done", label: "Done", icon: "✓" },
+];
+
+const PROCESSING_STATES = ["UPLOADED", "PROCESSING", "REPROCESSING"];
+
+function pipelineHtml(status, step) {
+  const failed = status === "FAILED" || status === "REJECTED";
+  let activeIdx = -1;
+  let doneIdx = -1;
+
+  if (failed) {
+    activeIdx = -1;
+    doneIdx = -1;
+  } else if (status === "COMPLETED") {
+    doneIdx = PIPELINE.length - 1;
+  } else if (status === "PROCESSING" || status === "REPROCESSING") {
+    if (step === "ai") { activeIdx = 2; doneIdx = 1; }
+    else { activeIdx = 1; doneIdx = 0; }
+  } else {
+    // UPLOADED
+    doneIdx = 0;
+    activeIdx = 1;
+  }
+
+  const parts = [];
+  PIPELINE.forEach((s, i) => {
+    const isDone = !failed && i <= doneIdx;
+    const isActive = !failed && i === activeIdx;
+    const isAi = s.key === "ai" && isActive;
+    const failedHere = failed && i === 1;
+
+    let cls = "";
+    if (failedHere) cls = "failed";
+    else if (isDone) cls = "done";
+    else if (isActive) cls = "active" + (isAi ? " is-ai" : "");
+
+    const dot = isDone ? "✓" : failedHere ? "✕" : s.icon;
+    parts.push(
+      `<div class="pipe-step ${cls}"><span class="pipe-dot">${dot}</span><span class="pipe-label">${s.label}</span></div>`
+    );
+    if (i < PIPELINE.length - 1) {
+      parts.push(`<div class="pipe-line ${!failed && i < doneIdx ? "done" : ""}"></div>`);
+    }
+  });
+  return `<div class="pipeline">${parts.join("")}</div>`;
+}
+
+function statusCell(d) {
+  if (PROCESSING_STATES.includes(d.status)) {
+    return pipelineHtml(d.status, d.processingStep);
+  }
+  return statusBadge(d.status);
+}
+
 function renderStats(list) {
   const total = list.length;
   const completed = list.filter((d) => d.status === "COMPLETED").length;
@@ -71,19 +129,15 @@ function renderStats(list) {
 
 function renderFilterCounts(list) {
   $("#count-all").textContent = list.length;
-  $("#count-processing").textContent = list.filter((d) =>
-    ["UPLOADED", "PROCESSING", "REPROCESSING"].includes(d.status)
-  ).length;
+  $("#count-processing").textContent = list.filter((d) => PROCESSING_STATES.includes(d.status)).length;
   $("#count-completed").textContent = list.filter((d) => d.status === "COMPLETED").length;
-  $("#count-failed").textContent = list.filter((d) =>
-    ["FAILED", "REJECTED"].includes(d.status)
-  ).length;
+  $("#count-failed").textContent = list.filter((d) => ["FAILED", "REJECTED"].includes(d.status)).length;
 }
 
 function filteredDocs(list) {
   if (currentFilter === "all") return list;
   if (currentFilter === "PROCESSING") {
-    return list.filter((d) => ["UPLOADED", "PROCESSING", "REPROCESSING"].includes(d.status));
+    return list.filter((d) => PROCESSING_STATES.includes(d.status));
   }
   if (currentFilter === "FAILED") {
     return list.filter((d) => ["FAILED", "REJECTED"].includes(d.status));
@@ -107,7 +161,7 @@ function renderList() {
       <tr>
         <td>${escapeHtml(d.fileName)}</td>
         <td>${escapeHtml(d.documentType || "—")}</td>
-        <td>${statusBadge(d.status)}</td>
+        <td>${statusCell(d)}</td>
         <td>${escapeHtml(d.uploadedAt ? new Date(d.uploadedAt).toLocaleString() : "—")}</td>
         <td>${actions} <button class="link view" data-id="${d.documentId}">View</button></td>
       </tr>`;
@@ -125,7 +179,8 @@ function renderList() {
 function confidenceGauge(c) {
   if (c == null) return '<span class="muted-note">—</span>';
   const pct = Math.round(c * 100);
-  return `<div class="confidence"><div class="confidence-bar"><div class="confidence-fill" style="width:${pct}%"></div></div><span class="confidence-value">${pct}%</span></div>`;
+  const cls = pct >= 75 ? "high" : pct >= 50 ? "mid" : "low";
+  return `<div class="confidence"><div class="confidence-bar"><div class="confidence-fill ${cls}" style="width:${pct}%"></div></div><span class="confidence-value">${pct}%</span></div>`;
 }
 
 function pills(items, cls, icon, emptyLabel) {
@@ -148,7 +203,13 @@ function keyFieldsList(kf) {
 
 function renderDetail(d) {
   const body = $("#detail-body");
-  const parts = [
+  const parts = [];
+
+  if (PROCESSING_STATES.includes(d.status)) {
+    parts.push(pipelineHtml(d.status, d.processingStep));
+  }
+
+  parts.push(
     `<div class="detail-grid">
       <div>Status</div><div>${statusBadge(d.status)}</div>
       <div>Classification</div><div>${escapeHtml(d.classification || "—")}</div>
@@ -156,8 +217,8 @@ function renderDetail(d) {
       <div>Model</div><div>${escapeHtml(d.modelName || "—")}</div>
       <div>Uploaded</div><div>${escapeHtml(d.uploadedAt ? new Date(d.uploadedAt).toLocaleString() : "—")}</div>
       <div>Processed</div><div>${escapeHtml(d.processedAt ? new Date(d.processedAt).toLocaleString() : "—")}</div>
-    </div>`,
-  ];
+    </div>`
+  );
 
   if (d.status === "FAILED") {
     parts.push(
@@ -166,10 +227,12 @@ function renderDetail(d) {
     parts.push(`<button id="reprocess-btn">Reprocess</button>`);
   }
 
-  parts.push(`<h3>Summary</h3><p>${escapeHtml(d.summary || "—")}</p>`);
-  parts.push(keyFieldsList(d.keyFields));
-  parts.push(`<h3>Risk flags</h3>${pills(d.riskFlags, "risk", "⚠️", "None")}`);
-  parts.push(`<h3>Missing fields</h3>${pills(d.missingFields, "missing", "❗", "None")}`);
+  if (d.status === "COMPLETED") {
+    parts.push(`<h3>Summary</h3><p>${escapeHtml(d.summary || "—")}</p>`);
+    parts.push(keyFieldsList(d.keyFields));
+    parts.push(`<h3>Risk flags</h3>${pills(d.riskFlags, "risk", "⚠️", "None")}`);
+    parts.push(`<h3>Missing fields</h3>${pills(d.missingFields, "missing", "❗", "None")}`);
+  }
 
   body.innerHTML = parts.join("");
 
@@ -241,7 +304,7 @@ async function upload() {
 }
 
 async function pollUntilDone(id, attempts = 0) {
-  if (attempts > 40) {
+  if (attempts > 60) {
     await refreshList();
     return;
   }
@@ -256,7 +319,7 @@ async function pollUntilDone(id, attempts = 0) {
   } catch (_) {
     /* transient — keep polling */
   }
-  setTimeout(() => pollUntilDone(id, attempts + 1), 2000);
+  setTimeout(() => pollUntilDone(id, attempts + 1), 1500);
 }
 
 // --- Reprocess -------------------------------------------------------------

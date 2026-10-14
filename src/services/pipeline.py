@@ -39,10 +39,12 @@ def process_document(
 ) -> None:
     """Run the full pipeline for one document. Updates status on every step."""
     sql.update_status(document_id, DocumentStatus.PROCESSING)
+    sql.update_step(document_id, "ocr")
 
     model_id = _determine_model(hint)
     try:
         ocr_text, fields, confidence = di.analyze(content, model_id)
+        sql.update_step(document_id, "ai")
 
         sql.insert_extraction(
             result_id=str(uuid.uuid4()),
