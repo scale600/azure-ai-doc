@@ -17,11 +17,11 @@ Check off each step. All resource names below assume `unique_suffix` is set
 
 ## 1. Create the GitHub repository (private)
 
-- [ ] Create a **private** repo `azure-ai-doc`:
+- [x] Create a **private** repo `azure-ai-doc`:
       ```bash
       gh repo create azure-ai-doc --private --source . --remote origin --push
       ```
-- [ ] Verify the push excludes secrets:
+- [x] Verify the push excludes secrets:
       ```bash
       git check-ignore .env infra/terraform.tfvars web/config.js
       # → should list all three
@@ -29,12 +29,12 @@ Check off each step. All resource names below assume `unique_suffix` is set
 
 ## 2. Pick a globally-unique suffix
 
-- [ ] Choose `unique_suffix` (4–6 lowercase alphanumerics, e.g. `rl01`).
+- [x] Choose `unique_suffix` (4–6 lowercase alphanumerics, e.g. `rl01`).
       It disambiguates storage/keyvault/function names across all Azure tenants.
 
 ## 3. Configure the local `terraform.tfvars`
 
-- [ ] Copy the example and set the suffix:
+- [x] Copy the example and set the suffix:
       ```bash
       cp infra/terraform.tfvars.example infra/terraform.tfvars
       # edit: unique_suffix = "rl01"
@@ -45,14 +45,14 @@ Check off each step. All resource names below assume `unique_suffix` is set
 Terraform state should be remote (PRD §12). Create a storage account + container
 for it **before** first `terraform init`:
 
-- [ ] Create a dedicated resource group and storage account:
+- [x] Create a dedicated resource group and storage account:
       ```bash
       az group create --name idp-prototype-tfstate --location eastus
       az storage account create --name stidpstate<uniq> --resource-group idp-prototype-tfstate \
         --location eastus --sku Standard_LRS --kind StorageV2 --min-tls-version TLS1_2
       az storage container create --name tfstate --account-name stidpstate<uniq> --auth-mode login
       ```
-- [ ] Uncomment the `backend "azurerm"` block in `infra/backend.tf` and set the
+- [x] Uncomment the `backend "azurerm"` block in `infra/backend.tf` and set the
       storage account name + `key`.
 
 ## 5. Set up Azure OIDC for GitHub Actions
@@ -60,18 +60,19 @@ for it **before** first `terraform init`:
 GitHub Actions authenticates to Azure without secrets using OIDC federated
 credentials (PRD §12). One-time setup:
 
-- [ ] Create a service principal:
+- [x] Create a service principal:
       ```bash
       az ad sp create-for-rbac --name "gh-idp-prototype" --role Contributor \
         --scopes /subscriptions/<sub-id> --sdk-auth
       ```
       Save the JSON (contains `appId`, `tenant`).
-- [ ] Create the app registration's federated credential (or use
+- [x] Create the app registration's federated credential (or use
       `azure/actions/github-oidc`). The simplest path: add federated credentials
       in the portal (Microsoft Entra → App registrations → `<sp>` →
       Certificates & secrets → Federated credentials) for:
       - `repo:scale600/azure-ai-doc:pull_request` (plan)
       - `repo:scale600/azure-ai-doc:ref:refs/heads/main` (apply/deploy)
+      - `repo:scale600/azure-ai-doc:environment:production` (apply/deploy)
 - [ ] Grant the service principal `User Access Administrator` or use a separate
       principal for Key Vault if you later need role-based access (optional).
 
@@ -97,19 +98,19 @@ Repo → Settings → Secrets and variables → Actions.
 
 ## 7. Run Terraform (local first, then CI)
 
-- [ ] `cd infra && terraform init && terraform plan`
-- [ ] Review the plan (resource group `idp-prototype`, region `eastus`,
-      Document Intelligence F0, OpenAI S0 + `gpt-4o-mini` GlobalStandard
+- [x] `cd infra && terraform init && terraform plan`
+- [x] Review the plan (resource group `idp-prototype`, region `centralus`,
+      Document Intelligence F0, OpenAI S0 + `gpt-4.1-mini` GlobalStandard
       deployment, SQL Free, SWA Free).
-- [ ] `terraform apply`
-- [ ] Record outputs:
+- [x] `terraform apply`
+- [x] Record outputs:
       ```bash
       terraform output
       ```
 
 ## 8. Apply the SQL schema
 
-- [ ] Create the tables from `src/schema.sql` against the new database
+- [x] Create the tables from `src/schema.sql` against the new database
       (`sql-idp-<uniq>`, database `idpdb`). Use Azure Data Studio, `sqlcmd`,
       or the Azure SQL Query Editor (portal). Requires the SQL admin password
       from Key Vault secret `sql-password`.
@@ -118,7 +119,7 @@ Repo → Settings → Secrets and variables → Actions.
 
 The dashboard (Static Web App) calls the Function App cross-origin.
 
-- [ ] ```bash
+- [x] ```bash
       az functionapp cors add -g idp-prototype -n func-idp-<uniq> \
         --allowed-origins "https://swa-idp-<uniq>.azurestaticapps.net" \
                           "https://azure-ai-doc.techcloudup.com"
@@ -126,27 +127,27 @@ The dashboard (Static Web App) calls the Function App cross-origin.
 
 ## 10. Retrieve the dashboard API key
 
-- [ ] Read the generated API key from Key Vault:
+- [x] Read the generated API key from Key Vault:
       ```bash
       az keyvault secret show --vault-name kv-idp-<uniq> --name api-key \
         --query value -o tsv
       ```
-- [ ] Store it as the `API_KEY` GitHub secret (used to inject `web/config.js`
+- [x] Store it as the `API_KEY` GitHub secret (used to inject `web/config.js`
       at deploy time).
 
 ## 11. Get the Static Web App deployment token
 
-- [ ] ```bash
+- [x] ```bash
       az staticwebapp secrets list --name swa-idp-<uniq> --resource-group idp-prototype \
         --query "properties.apiKey" -o tsv
       ```
-- [ ] Store it as `AZURE_STATIC_WEB_APPS_API_TOKEN`.
+- [x] Store it as `AZURE_STATIC_WEB_APPS_API_TOKEN`.
 
 ## 12. Deploy via CI/CD (or manually)
 
-- [ ] Push to `main` (or open a PR first to see `terraform plan`).
+- [x] Push to `main` (or open a PR first to see `terraform plan`).
       The workflows run: `terraform apply` → `deploy-function` → `deploy-web`.
-- [ ] Manual fallback (if not using CI yet):
+- [x] Manual fallback (if not using CI yet):
       ```bash
       # function
       cd src && pip install -r requirements.txt --target=".python_packages/lib/site-packages"
@@ -171,17 +172,17 @@ The dashboard (Static Web App) calls the Function App cross-origin.
 
 ## 14. End-to-end smoke test
 
-- [ ] Upload a 1-page synthetic KYC image (or PDF) via the dashboard.
-- [ ] Observe: `UPLOADED → PROCESSING → COMPLETED` with summary, classification,
+- [x] Upload a 1-page synthetic KYC image (or PDF) via the dashboard.
+- [x] Observe: `UPLOADED → PROCESSING → COMPLETED` with summary, classification,
       key fields, and confidence.
 - [ ] Upload a 3-page PDF → expect immediate `413` rejection.
 - [ ] Upload a 6MB file → expect `413`.
-- [ ] Call `/api/health` → `{"status":"ok"}`.
-- [ ] Call `/api/documents` without `x-api-key` → `401`.
+- [x] Call `/api/health` → `{"status":"ok"}`.
+- [x] Call `/api/documents` without `x-api-key` → `401`.
 
 ## 15. Verify observability
 
-- [ ] Check Application Insights for function traces, token usage, and errors.
+- [x] Check Application Insights for function traces, token usage, and errors.
 
 ---
 
