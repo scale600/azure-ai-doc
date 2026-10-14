@@ -28,9 +28,11 @@ resource "azurerm_mssql_server" "main" {
 # `terraform import azurerm_mssql_database.main <id>`, or fall back to
 # sku_name = "Basic" / "S0". See docs/implementation-checklist.md §6.
 resource "azurerm_mssql_database" "main" {
-  name        = local.sql_database_name
-  server_id   = azurerm_mssql_server.main.id
-  sku_name    = var.sql_database_sku
-  max_size_gb = 32
-  tags        = var.tags
+  name                 = local.sql_database_name
+  server_id            = azurerm_mssql_server.main.id
+  sku_name             = var.sql_database_sku
+  max_size_gb          = 32
+  geo_backup_enabled   = false
+  storage_account_type = "Local"
+  tags                 = var.tags
 }

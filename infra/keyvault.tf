@@ -21,24 +21,28 @@ resource "azurerm_key_vault_secret" "storage_connection" {
   name         = "storage-connection"
   value        = azurerm_storage_account.main.primary_connection_string
   key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_key_vault_access_policy.admin]
 }
 
 resource "azurerm_key_vault_secret" "di_key" {
   name         = "di-key"
   value        = azurerm_cognitive_account.document_intelligence.primary_access_key
   key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_key_vault_access_policy.admin]
 }
 
 resource "azurerm_key_vault_secret" "openai_key" {
   name         = "openai-key"
   value        = azurerm_cognitive_account.openai.primary_access_key
   key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_key_vault_access_policy.admin]
 }
 
 resource "azurerm_key_vault_secret" "sql_password" {
   name         = "sql-password"
   value        = random_password.sql_admin.result
   key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_key_vault_access_policy.admin]
 }
 
 resource "random_password" "api_key" {
@@ -53,6 +57,7 @@ resource "azurerm_key_vault_secret" "api_key" {
   name         = "api-key"
   value        = random_password.api_key.result
   key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_key_vault_access_policy.admin]
 }
 
 # --- access policies --------------------------------------------------------
