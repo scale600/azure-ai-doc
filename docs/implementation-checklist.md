@@ -157,16 +157,16 @@ The dashboard (Static Web App) calls the Function App cross-origin.
 
 ## 13. Configure the custom domain (Cloudflare DNS, manual)
 
-- [ ] In Cloudflare (zone `techcloudup.com`), add a CNAME:
+- [x] In Cloudflare (zone `techcloudup.com`), add a CNAME:
       | Type | Name | Target | Proxy |
       |---|---|---|---|
       | CNAME | `azure-ai-doc` | `swa-idp-<uniq>.azurestaticapps.net` | Proxied |
-- [ ] Add the custom domain to the Static Web App:
+- [x] Add the custom domain to the Static Web App:
       ```bash
       az staticwebapp hostname set --name swa-idp-<uniq> --resource-group idp-prototype \
         --hostname azure-ai-doc.techcloudup.com
       ```
-- [ ] Wait for validation/TLS (Cloudflare proxied → use "Cloudflare" for the
+- [x] Wait for validation/TLS (Cloudflare proxied → use "Cloudflare" for the
       SSL mode if asked; otherwise switch the record to DNS-only for validation,
       then back to proxied).
 
