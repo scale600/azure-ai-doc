@@ -1,5 +1,5 @@
 azure-functions>=1.19.0
-azure-storage-blob>=12.19.0
+azure-storage-blob>=12.31.0
 azure-ai-formrecognizer>=3.3.0
 azure-identity>=1.16.0
 openai>=1.30.0
