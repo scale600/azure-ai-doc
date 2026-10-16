@@ -39,9 +39,9 @@
       <h2 class="section-title">The AI core</h2>
       <div class="prose">
         <p>The system is built around two Azure AI services working together:</p>
-        <p><strong>Azure AI Document Intelligence</strong> is the "reader". It performs OCR and structured field extraction using prebuilt models (<code>prebuilt-idDocument</code>, <code>prebuilt-invoice</code>, <code>prebuilt-read</code>), turning an image or PDF into structured text and fields with confidence scores.</p>
-        <p><strong>Azure OpenAI</strong> (<code>gpt-4.1-mini</code>) is the "reasoner". It reads the extracted text and fields, then classifies the document, writes a natural-language summary, detects risk signals and missing fields, and produces a confidence score — all returned as strict, validated JSON.</p>
-        <p>Together they replace the manual work of reading, classifying, and flagging documents: upload in, structured intelligence out.</p>
+        <p><strong>Azure AI Document Intelligence</strong> is the "reader". It performs OCR and structured field extraction using prebuilt models (<code>prebuilt-idDocument</code>, <code>prebuilt-invoice</code>, <code>prebuilt-read</code>), turning an image or PDF into structured text and fields with confidence scores. Its ML approach is <strong>supervised deep learning</strong> — a vision/layout model (CNN + transformer) trained on labeled document images.</p>
+        <p><strong>Azure OpenAI</strong> (<code>gpt-4.1-mini</code>) is the "reasoner". It reads the extracted text and fields, then classifies the document, writes a natural-language summary, detects risk signals and missing fields, and produces a confidence score — all returned as strict, validated JSON. Its ML approach is a <strong>large language model (LLM)</strong> — a transformer trained with self-supervised learning and fine-tuned with RLHF.</p>
+        <p>Together they replace the manual work of reading, classifying, and flagging documents: upload in, structured intelligence out. This project does not train its own models — it calls these pre-trained, managed AI services for inference only.</p>
       </div>
     </section>
 
