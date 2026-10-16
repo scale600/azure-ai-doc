@@ -658,6 +658,40 @@ button.icon-btn:hover {
   color: #fff;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.social a {
+  color: #c7d2fe;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.social a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.social svg {
+  width: 18px;
+  height: 18px;
+}
+
 .brand {
   color: #fff;
   text-decoration: none;
