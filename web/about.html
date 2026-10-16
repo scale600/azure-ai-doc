@@ -37,11 +37,21 @@
 
     <section class="card">
       <h2 class="section-title">The AI core</h2>
-      <div class="prose">
-        <p>The system is built around two Azure AI services working together:</p>
-        <p><strong>Azure AI Document Intelligence</strong> is the "reader". It performs OCR and structured field extraction using prebuilt models (<code>prebuilt-idDocument</code>, <code>prebuilt-invoice</code>, <code>prebuilt-read</code>), turning an image or PDF into structured text and fields with confidence scores. Its ML approach is <strong>supervised deep learning</strong> — a vision/layout model (CNN + transformer) trained on labeled document images.</p>
-        <p><strong>Azure OpenAI</strong> (<code>gpt-4.1-mini</code>) is the "reasoner". It reads the extracted text and fields, then classifies the document, writes a natural-language summary, detects risk signals and missing fields, and produces a confidence score — all returned as strict, validated JSON. Its ML approach is a <strong>large language model (LLM)</strong> — a transformer trained with self-supervised learning and fine-tuned with RLHF.</p>
-        <p>Together they replace the manual work of reading, classifying, and flagging documents: upload in, structured intelligence out. This project does not train its own models — it calls these pre-trained, managed AI services for inference only.</p>
+      <div class="core-grid">
+        <div class="core-card reader">
+          <span class="core-icon">🔍</span>
+          <div class="core-title">Document Intelligence <span class="ml-tag dl">Supervised DL</span></div>
+          <p>The "reader" — OCR and structured field extraction via <code>prebuilt-idDocument</code>, <code>prebuilt-invoice</code>, <code>prebuilt-read</code>.</p>
+        </div>
+        <span class="core-arrow">→</span>
+        <div class="core-card reasoner">
+          <span class="core-icon">✦</span>
+          <div class="core-title">Azure OpenAI · gpt-4.1-mini <span class="ml-tag llm">LLM + RLHF</span></div>
+          <p>The "reasoner" — classification, summarization, risk and missing-field detection, with a confidence score.</p>
+        </div>
+      </div>
+      <div class="prose" style="margin-top:16px;">
+        <p>Together they replace the manual work of reading, classifying, and flagging documents. This project does not train its own models — it calls these pre-trained, managed AI services for inference only.</p>
       </div>
     </section>
 
@@ -62,34 +72,42 @@
       <h2 class="section-title">Technology stack</h2>
       <div class="tech-grid">
         <div class="tech-card">
+          <span class="tech-icon">🔍</span>
           <h4>Azure AI Document Intelligence</h4>
           <p>OCR and field extraction via prebuilt models.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">✦</span>
           <h4>Azure OpenAI · gpt-4.1-mini</h4>
           <p>Classification, summarization, risk and missing-field detection.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">⚡</span>
           <h4>Azure Functions</h4>
           <p>Serverless Python pipeline triggered by blob events.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">💾</span>
           <h4>Azure SQL &amp; Blob Storage</h4>
           <p>Structured results and source documents.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">🔐</span>
           <h4>Key Vault + Managed Identity</h4>
           <p>Secrets are never in code; access is identity-based.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">🖥</span>
           <h4>Static Web App</h4>
           <p>The dashboard front-end.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">🧱</span>
           <h4>Terraform</h4>
           <p>Infrastructure as code.</p>
         </div>
         <div class="tech-card">
+          <span class="tech-icon">🚀</span>
           <h4>GitHub Actions</h4>
           <p>CI/CD with OIDC authentication.</p>
         </div>

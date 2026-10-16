@@ -13,51 +13,65 @@ Actions** and served by a **Static Web App** dashboard on
 
 Two machine-learning services do the heavy lifting, each with a different ML approach:
 
-| Service | Role | ML approach |
+| | Reader | Reasoner |
 |---|---|---|
-| **Azure AI Document Intelligence** | the "reader" — OCR + structured field extraction | Supervised deep learning (CNN + transformer vision/layout models) |
-| **Azure OpenAI (`gpt-4.1-mini`)** | the "reasoner" — classification, summarization, risk & missing-field detection | Large language model (transformer, self-supervised learning + RLHF) |
+| **Service** | Azure AI Document Intelligence | Azure OpenAI · `gpt-4.1-mini` |
+| **Role** | OCR + structured field extraction | Classification, summarization, risk & missing-field detection |
+| **ML approach** | 🧠 Supervised deep learning (CNN + transformer vision/layout models) | ✦ Large language model (transformer, self-supervised + RLHF) |
 
 This project does not train its own models — it calls these pre-trained, managed
 AI services for **inference only**.
 
 ## How it works
 
-A five-stage pipeline; two stages are AI:
+```mermaid
+flowchart LR
+    A[⬆ Upload<br/>Blob Storage] --> B[🔍 OCR<br/>Document Intelligence]
+    B --> C[✦ AI Reasoning<br/>Azure OpenAI]
+    C --> D[💾 Persist<br/>Azure SQL]
+    D --> E[📊 Dashboard<br/>Static Web App]
 
-```
-1. Upload ──► 2. OCR (Document Intelligence) ──► 3. AI reasoning (Azure OpenAI) ──► 4. Persist (SQL) ──► 5. Dashboard
+    style B fill:#eef2ff,stroke:#6366f1,color:#3730a3
+    style C fill:#f5f3ff,stroke:#a855f7,color:#7c3aed
 ```
 
 1. **Ingestion** — upload via drag-and-drop or REST API; validated (PDF/PNG/JPEG, ≤ 4MB, ≤ 2 pages); stored in Blob Storage; a blob event triggers the Azure Function.
-2. **Document Intelligence (OCR)** — `prebuilt-idDocument` / `prebuilt-invoice` / `prebuilt-read` extract text and structured fields with per-field confidence.
-3. **Azure OpenAI (AI reasoning)** — `gpt-4.1-mini` classifies the document, writes a summary, detects risk signals and missing fields, and returns a confidence score as strict, validated JSON (`temperature = 0.2`).
+2. **🔍 Document Intelligence (OCR)** — `prebuilt-idDocument` / `prebuilt-invoice` / `prebuilt-read` extract text and structured fields with per-field confidence.
+3. **✦ Azure OpenAI (AI reasoning)** — `gpt-4.1-mini` classifies the document, writes a summary, detects risk signals and missing fields, and returns a confidence score as strict, validated JSON (`temperature = 0.2`).
 4. **Persistence** — results written to Azure SQL (`Documents`, `ExtractionResults`, `AIInsights`); PII is masked before storage.
 5. **Dashboard** — a live pipeline stepper (Upload → OCR → AI → Done), confidence gauge, key fields, and risk/missing-field flags.
 
-## Architecture at a glance
+## Architecture
 
+```mermaid
+flowchart TB
+    W[📊 Dashboard<br/>Static Web App] -->|HTTPS + x-api-key| F[⚡ Azure Functions<br/>Python]
+    F --> B[💾 Blob Storage]
+    B -->|blob trigger| F
+    F --> DI[🔍 Document Intelligence]
+    F --> OAI[✦ Azure OpenAI]
+    F --> S[Azure SQL]
+    F --> KV[🔐 Key Vault]
+
+    style DI fill:#eef2ff,stroke:#6366f1
+    style OAI fill:#f5f3ff,stroke:#a855f7
 ```
-Upload ─► Functions HTTP API ─► Blob Storage ─(trigger)─► Functions
-                                                            ├─ Document Intelligence (F0)
-                                                            ├─ Azure OpenAI (gpt-4.1-mini)
-                                                            └─ Azure SQL
-Dashboard (Static Web App) ◄── HTTPS + x-api-key ── HTTP API
-Secrets: Key Vault + Managed Identity    Observability: App Insights
-```
+
+Secrets live in Key Vault and are accessed via Managed Identity; observability
+is handled by Application Insights.
 
 ## Technology stack
 
 | Layer | Technology |
 |---|---|
-| AI — OCR | Azure AI Document Intelligence |
-| AI — reasoning | Azure OpenAI · `gpt-4.1-mini` |
-| Compute | Azure Functions (Python, serverless) |
-| Storage | Azure Blob Storage + Azure SQL |
-| Secrets | Key Vault + Managed Identity |
-| Front-end | Static Web App |
-| Infrastructure | Terraform |
-| CI/CD | GitHub Actions (OIDC) |
+| 🔍 AI — OCR | Azure AI Document Intelligence |
+| ✦ AI — reasoning | Azure OpenAI · `gpt-4.1-mini` |
+| ⚡ Compute | Azure Functions (Python, serverless) |
+| 💾 Storage | Azure Blob Storage + Azure SQL |
+| 🔐 Secrets | Key Vault + Managed Identity |
+| 🖥 Front-end | Static Web App |
+| 🧱 Infrastructure | Terraform |
+| 🚀 CI/CD | GitHub Actions (OIDC) |
 
 ## Repository layout
 

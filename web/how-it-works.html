@@ -37,8 +37,19 @@
 
     <section class="card">
       <h2 class="section-title">The pipeline at a glance</h2>
-      <div class="prose">
-        <p><strong>Upload</strong> → <strong>OCR &amp; field extraction</strong> (Document Intelligence) → <strong>AI reasoning</strong> (Azure OpenAI) → <strong>Persist</strong> (Azure SQL) → <strong>Dashboard</strong>. Two of these five stages are AI — and they are the core of the system.</p>
+      <div class="flow-overview">
+        <div class="flow-step"><span class="flow-icon">⬆</span><span class="flow-label">Upload</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step ai"><span class="flow-icon">🔍</span><span class="flow-label">OCR</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step ai"><span class="flow-icon">✦</span><span class="flow-label">AI</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-icon">💾</span><span class="flow-label">SQL</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-icon">📊</span><span class="flow-label">Dashboard</span></div>
+      </div>
+      <div class="prose" style="margin-top:14px;">
+        <p>Two of these five stages are AI — highlighted in purple — and they are the core of the system.</p>
       </div>
     </section>
 
@@ -55,7 +66,7 @@
       <div>
         <h3>Azure AI Document Intelligence — OCR &amp; field extraction</h3>
         <p>The first AI layer reads the document. It runs OCR to convert the image/PDF into machine-readable text, then applies a prebuilt model to pull out structured fields with per-field confidence scores.</p>
-        <p><strong>ML approach</strong> — supervised deep learning: a vision/layout model (CNN + transformer) trained on millions of labeled document images to recognize structure and extract fields.</p>
+        <p><span class="ml-tag dl">Supervised DL</span> <strong>ML approach</strong> — a vision/layout model (CNN + transformer) trained on millions of labeled document images to recognize structure and extract fields.</p>
         <ul>
           <li><code>prebuilt-idDocument</code> — extracts identity fields (name, date of birth, document number, expiration, nationality, address).</li>
           <li><code>prebuilt-invoice</code> — extracts invoice fields (vendor, customer, invoice/due dates, line items, subtotal, tax, total).</li>
@@ -70,7 +81,7 @@
       <div>
         <h3>Azure OpenAI — AI reasoning (the core)</h3>
         <p>This is the brain of the system. The extracted OCR text and fields are passed to <code>gpt-4.1-mini</code> (GlobalStandard deployment) with a carefully engineered prompt, and the model reasons over the document to produce structured intelligence.</p>
-        <p><strong>ML approach</strong> — a large language model (LLM): a transformer trained with self-supervised learning on massive text corpora, then fine-tuned with RLHF (reinforcement learning from human feedback).</p>
+        <p><span class="ml-tag llm">LLM + RLHF</span> <strong>ML approach</strong> — a transformer trained with self-supervised learning on massive text corpora, then fine-tuned with RLHF (reinforcement learning from human feedback).</p>
         <ul>
           <li><strong>Prompt engineering</strong> — a system prompt defines the role and constraints ("use only the provided OCR text and extracted fields; do not invent values"), and a structured user prompt carries the type hint, extracted fields (JSON), and raw OCR text.</li>
           <li><strong>Deterministic output</strong> — <code>temperature = 0.2</code> keeps responses factual and consistent across runs.</li>
