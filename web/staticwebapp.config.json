@@ -1,8 +1,6 @@
 {
-  "navigationFallback": {
-    "rewrite": "/index.html"
-  },
   "globalHeaders": {
+    "Cache-Control": "no-cache, must-revalidate",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer"
