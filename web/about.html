@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — AI Document Processing</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">✦</span>
+        <span class="brand-text">AI Document Processing</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="how-it-works.html" class="nav-link">How It Works</a>
+        <a href="about.html" class="nav-link active">About</a>
+        <a href="docs.html" class="nav-link">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="page-hero">
+      <span class="ai-tag">✦ AI-First Document Processing</span>
+      <h1>An AI-first pipeline for financial documents</h1>
+      <p>This service prototype automates what used to be slow, manual document review. It classifies, extracts, and summarizes KYC identity documents, invoices, and service applications — and it does so with AI at every meaningful step.</p>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">The AI core</h2>
+      <div class="prose">
+        <p>The system is built around two Azure AI services working together:</p>
+        <p><strong>Azure AI Document Intelligence</strong> is the "reader". It performs OCR and structured field extraction using prebuilt models (<code>prebuilt-idDocument</code>, <code>prebuilt-invoice</code>, <code>prebuilt-read</code>), turning an image or PDF into structured text and fields with confidence scores.</p>
+        <p><strong>Azure OpenAI</strong> (<code>gpt-4.1-mini</code>) is the "reasoner". It reads the extracted text and fields, then classifies the document, writes a natural-language summary, detects risk signals and missing fields, and produces a confidence score — all returned as strict, validated JSON.</p>
+        <p>Together they replace the manual work of reading, classifying, and flagging documents: upload in, structured intelligence out.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">What it does</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>Classifies</strong> documents into types (KYC ID, invoice, application).</li>
+          <li><strong>Extracts</strong> key fields with confidence.</li>
+          <li><strong>Summarizes</strong> content in natural language.</li>
+          <li><strong>Detects risks</strong> (expirations, anomalies) and <strong>missing fields</strong>.</li>
+          <li><strong>Visualizes</strong> the whole process live on a dashboard.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Technology stack</h2>
+      <div class="tech-grid">
+        <div class="tech-card">
+          <h4>Azure AI Document Intelligence</h4>
+          <p>OCR and field extraction via prebuilt models.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Azure OpenAI · gpt-4.1-mini</h4>
+          <p>Classification, summarization, risk and missing-field detection.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Azure Functions</h4>
+          <p>Serverless Python pipeline triggered by blob events.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Azure SQL &amp; Blob Storage</h4>
+          <p>Structured results and source documents.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Key Vault + Managed Identity</h4>
+          <p>Secrets are never in code; access is identity-based.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Static Web App</h4>
+          <p>The dashboard front-end.</p>
+        </div>
+        <div class="tech-card">
+          <h4>Terraform</h4>
+          <p>Infrastructure as code.</p>
+        </div>
+        <div class="tech-card">
+          <h4>GitHub Actions</h4>
+          <p>CI/CD with OIDC authentication.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Architecture</h2>
+      <div class="prose">
+        <pre style="background:#0f172a;color:#e2e8f0;padding:18px;border-radius:12px;font-size:13px;line-height:1.6;overflow-x:auto;font-family:ui-monospace,Menlo,Consolas,monospace;">
+Upload ──► Blob Storage ──(trigger)──► Azure Functions
+                                         ├─ Document Intelligence (OCR)
+                                         ├─ Azure OpenAI (reasoning)
+                                         └─ Azure SQL (persist)
+Dashboard (Static Web App) ◄── HTTPS + API key ── HTTP API
+Secrets: Key Vault + Managed Identity</pre>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works — AI Document Processing</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">✦</span>
+        <span class="brand-text">AI Document Processing</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="how-it-works.html" class="nav-link active">How It Works</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="docs.html" class="nav-link">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="page-hero">
+      <span class="ai-tag">✦ AI-Powered Pipeline</span>
+      <h1>How the AI document pipeline works</h1>
+      <p>Every uploaded document flows through a five-stage pipeline where two AI services do the heavy lifting: Azure AI Document Intelligence reads and structures the document, and Azure OpenAI reasons over it to classify, summarize, and flag risks.</p>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">The pipeline at a glance</h2>
+      <div class="prose">
+        <p><strong>Upload</strong> → <strong>OCR &amp; field extraction</strong> (Document Intelligence) → <strong>AI reasoning</strong> (Azure OpenAI) → <strong>Persist</strong> (Azure SQL) → <strong>Dashboard</strong>. Two of these five stages are AI — and they are the core of the system.</p>
+      </div>
+    </section>
+
+    <div class="stage">
+      <span class="stage-num">1</span>
+      <div>
+        <h3>Ingestion — Blob Storage</h3>
+        <p>A document is uploaded through the drag-and-drop dashboard or the REST API. The upload handler validates it — <code>PDF / PNG / JPEG</code>, max <code>4MB</code>, max <code>2 pages</code> — then stores the raw file in a private Azure Blob Storage container. A blob-created event fires the Azure Function that runs the pipeline.</p>
+      </div>
+    </div>
+
+    <div class="stage ai-stage">
+      <span class="stage-num">2</span>
+      <div>
+        <h3>Azure AI Document Intelligence — OCR &amp; field extraction</h3>
+        <p>The first AI layer reads the document. It runs OCR to convert the image/PDF into machine-readable text, then applies a prebuilt model to pull out structured fields with per-field confidence scores.</p>
+        <ul>
+          <li><code>prebuilt-idDocument</code> — extracts identity fields (name, date of birth, document number, expiration, nationality, address).</li>
+          <li><code>prebuilt-invoice</code> — extracts invoice fields (vendor, customer, invoice/due dates, line items, subtotal, tax, total).</li>
+          <li><code>prebuilt-read</code> — general-purpose OCR used in the auto-detect path (2-pass: read → classify).</li>
+        </ul>
+        <p>The model is chosen from the document-type hint selected at upload (<code>KYC_ID</code> → idDocument, <code>INVOICE</code> → invoice); otherwise the pipeline falls back to <code>prebuilt-read</code> and lets the next AI stage classify it.</p>
+      </div>
+    </div>
+
+    <div class="stage ai-stage">
+      <span class="stage-num">3</span>
+      <div>
+        <h3>Azure OpenAI — AI reasoning (the core)</h3>
+        <p>This is the brain of the system. The extracted OCR text and fields are passed to <code>gpt-4.1-mini</code> (GlobalStandard deployment) with a carefully engineered prompt, and the model reasons over the document to produce structured intelligence.</p>
+        <ul>
+          <li><strong>Prompt engineering</strong> — a system prompt defines the role and constraints ("use only the provided OCR text and extracted fields; do not invent values"), and a structured user prompt carries the type hint, extracted fields (JSON), and raw OCR text.</li>
+          <li><strong>Deterministic output</strong> — <code>temperature = 0.2</code> keeps responses factual and consistent across runs.</li>
+          <li><strong>Strict JSON schema</strong> — the response is validated against a Pydantic model (camelCase, extra fields rejected) before it is trusted.</li>
+        </ul>
+        <p>The model returns:</p>
+        <ul>
+          <li><code>classification</code> — the detected document type.</li>
+          <li><code>summary</code> — a natural-language summary.</li>
+          <li><code>keyFields</code> — normalized key-value fields.</li>
+          <li><code>riskFlags</code> — anomalies such as expired documents or mismatched amounts.</li>
+          <li><code>missingFields</code> — required fields that were not found.</li>
+          <li><code>recommendedAction</code> — a suggested next step for an operator.</li>
+          <li><code>confidence</code> — a 0–1 score for the overall result.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stage">
+      <span class="stage-num">4</span>
+      <div>
+        <h3>Persistence — Azure SQL</h3>
+        <p>Structured results are written to Azure SQL across three tables: <code>Documents</code> (status and metadata), <code>ExtractionResults</code> (OCR fields and confidence), and <code>AIInsights</code> (the OpenAI output). Sensitive fields are masked before storage — names to the first letter, document numbers to the last four digits.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <span class="stage-num">5</span>
+      <div>
+        <h3>Visualization — Dashboard</h3>
+        <p>The Static Web App dashboard renders results in real time. While a document is processing, a live stepper shows the exact AI stage in progress (Upload → OCR → AI → Done); when complete, it shows the confidence gauge, extracted key fields, summary, and any risk or missing-field flags.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
