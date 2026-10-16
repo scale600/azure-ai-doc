@@ -22,7 +22,7 @@ jobs:
       TF_VAR_unique_suffix: ${{ secrets.TF_VAR_UNIQUE_SUFFIX }}
       TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: hashicorp/setup-terraform@v3
         with:
